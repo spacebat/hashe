@@ -309,6 +309,14 @@ bucket ratio, maximum bucket population and possibly others."
     (hashe-map hash-table (lambda (k v) (hashe-del hash-table k)))
     (should (= (hashe-num-elements hash-table) 0))))
 
+(ert-deftest hashe-transform-test ()
+  (let* ((alist '(("one" . 1) ("two" . 2)))
+         (plist '("three" 3 "four" 4))
+         (ahash (hashe-from-alist alist))
+         (phash (hashe-from-plist plist)))
+    (should (equalp (hashe-to-plist phash) plist))
+    (should (equalp (hashe-to-alist ahash) alist))))
+
 (defun hashe-run-tests ()
   "Run the hashe package test suite."
   (ert "^hashe-"))
