@@ -1,0 +1,48 @@
+#+TITLE: hashe
+#+AUTHOR: Andrew Kirkpatrick
+#+DESCRIPTION: a simple hash table implementation in elisp.
+
+* Overview
+I've read (Steve Yegge in his [[http://steve-yegge.blogspot.com.au/2008/11/ejacs-javascript-interpreter-for-emacs.html][Ejacs post]]) that hash tables in elisp
+are too heavyweight.  This got me thinking about what's involved in a
+hash table, so I decided to write one in elisp.  Of course, this is
+even more heavyweight.
+
+This implementation stores keys as strings only for simplicity.
+
+* Usage:
+ Put hashe.el in your emacs load path then, for example in IELM:
+
+#+BEGIN_SRC emacs-lisp
+  (require 'hashe)
+  ;; hashe
+
+  (setq h (make-hashe))
+  ;; [cl-struct-hashe 16 0 0 1.0 1.5 hashe-default-function
+  ;;                  [nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil nil]]
+
+  (hashe-put h 'key 'value)
+  ;; value
+
+  (hashe-get h "key")
+  ;; value
+
+  (hashe-get h 'key)
+  ;; value
+
+  (hashe-put h "foo" "bar")
+  ;; "bar"
+
+  (hashe-keys h)
+  ;; ("key" "foo")
+
+  (hashe-values h)
+  ;; (value "bar")
+
+  (hashe-to-alist h)
+  ;; (("key" . value)
+  ;;  ("foo" . "bar"))
+
+  (hashe-get (hashe-from-plist (hashe-to-plist h)) 'foo)
+  ;; "bar"
+#+END_SRC

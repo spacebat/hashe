@@ -3,7 +3,8 @@
 ;;; Commentary:
 ;; I've read (Steve Yegge in his Ejacs post) that hash tables in elisp
 ;; are too heavyweight.  This got me thinking about what's involved in
-;; a hash table, so I decided to write one.
+;; a hash table, so I decided to write one in elisp.  Of course, this is
+;; even more heavyweight.
 ;;
 ;; This implementation stores keys as strings only for simplicity.
 ;;
