@@ -271,9 +271,9 @@ previous one.  Returns a new hash with the existing data."
 bucket ratio, maximum bucket population and possibly others."
   (list
    (cons 'bucket-use-ratio (/ (float (hashe-num-used-buckets hash))
-                              (hashe-num-buckets hash) 1.0))
-   (cons 'element-bucket-ratio (/ (hashe-num-elements hash)
-                                  (hashe-num-buckets hash) 1.0))
+                              (hashe-num-buckets hash)))
+   (cons 'element-bucket-ratio (/ (float (hashe-num-elements hash))
+                                  (hashe-num-buckets hash)))
    (cons 'max-bucket-population (loop for bucket across (hashe-buckets hash)
                                       maximizing (length bucket)))))
 
