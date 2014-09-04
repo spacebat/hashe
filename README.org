@@ -1,4 +1,3 @@
-#+TITLE: hashe
 #+AUTHOR: Andrew Kirkpatrick
 #+DESCRIPTION: a simple hash table implementation in elisp.
 
