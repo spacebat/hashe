@@ -291,7 +291,9 @@ bucket ratio, maximum bucket population and possibly others."
 
 (defmacro* hashe--test-fixture (n-buckets func &body body)
   (declare (indent defun))
-  (let ((args (if func (list n-buckets func) (list n-buckets))))
+  (let ((args (list n-buckets)))
+    (when func
+      (setq args (append args (list func))))
     `(let* ((hash-table (apply 'make-hashe ',args)))
        ,@body)))
 
