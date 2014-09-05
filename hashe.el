@@ -116,15 +116,20 @@ slot     - element of the vector referred to by slot-idx"
            (loop for ,var in ,bucket-sym do
                  ,@body))))
 
-(defun hashe-get (hash key)
-  "Searches the hash for key to obtain the value.
-Returns the value found, or nil if not found."
+(defun hashe-get (hash key &optional no-error-p)
+  "Search `HASH' for `KEY' to obtain the value.
+
+If the key is found, returns the corresponding value.  If the key
+is not found an error is thrown, unless `NO-ERROR-P' is a true,
+value in which case nil is returned."
   (hashe--setup hash key
     (loop for elt in slot do
           (when (string= (car elt) key-str)
             (return (cdr elt)))
-          finally
-          return nil)))
+          finally do
+          (if no-error-p
+              (return nil)
+            (error "key not found in hashe object")))))
 
 (defun hashe-exists (hash key)
   "Searches the hash for key to determine its presence.
