@@ -80,12 +80,13 @@ parameters num-buckets and hash-function."
     (setf (hashe-function hash) (or hash-function 'hashe-default-function))
     hash))
 
-(defmacro hashe--stringify (key)
-  "Stringify whatever type the key is, optimized for string and symbol"
-  `(cond
-    ((stringp ,key) ,key)
-    ((symbolp ,key) (symbol-name ,key))
-    (t (format "%s" ,key))))
+(defsubst hashe--stringify (key)
+  "Stringify whatever type the key is, optimized for string and
+symbol."
+  (cond
+   ((stringp key) key)
+   ((symbolp key) (symbol-name key))
+   (t (format "%s" key))))
 
 (defmacro hashe--setup (hash key &rest body)
   "Wrapper for common use in hashe-get, -exists, -put, -del functions,
