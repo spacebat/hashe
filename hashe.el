@@ -56,7 +56,8 @@
   buckets)
 
 (defun hashe-default-function (max key)
-  "Convert key (a string) into a number 0..max-1
+  "Derive an integer on [0, `MAX'-1] from string `KEY'.
+
 Adapted from the AP hash function by Arash Partow,
 see http://www.partow.net/programming/hashfunctions/"
   (loop with h = #b10101010101010101010101010101 ;; 29 bits
@@ -70,8 +71,9 @@ see http://www.partow.net/programming/hashfunctions/"
         finally return (% (abs h) max)))
 
 (defun make-hashe (&optional num-buckets hash-function)
-  "Construct and return a hashe table. Accepts optional
-parameters num-buckets and hash-function."
+  "Construct and return a hashe table.
+
+Accepts optional parameters `NUM-BUCKETS' and `HASH-FUNCTION'."
   (let ((hash (hashe--create)))
     (when (not num-buckets)
       (setf num-buckets (hashe-num-buckets hash)))
@@ -81,16 +83,15 @@ parameters num-buckets and hash-function."
     hash))
 
 (defsubst hashe--stringify (key)
-  "Stringify whatever type the key is, optimized for string and
-symbol."
+  "Stringify `KEY', optimized for string and symbol."
   (cond
    ((stringp key) key)
    ((symbolp key) (symbol-name key))
    (t (format "%s" key))))
 
 (defmacro hashe--setup (hash key &rest body)
-  "Wrapper for common use in hashe-get, -exists, -put, -del functions,
-providing to the function body:
+  "Wrapper for common use in hashe-get, -exists, -put, -del functions.
+Given `HASH' and `KEY', provides to the form `BODY':
 
 key-str  - stringified key
 buckets  - vector of hash buckets
@@ -108,7 +109,9 @@ slot     - element of the vector referred to by slot-idx"
        ,@body)))
 
 (defmacro hashe--iter (hash var &rest body)
-  "Wrapper to consistently iterate over all elements in the table."
+  "Wrapper to consistently iterate over all elements in `HASH'.
+
+The variable indicated by `VAR' is used for iteration in `BODY'."
   (declare (indent defun))
   (let ((bucket-sym (gensym "bucket")))
     (assert (and var (symbolp var)) t "var parameter must be a symbol.")
@@ -132,7 +135,8 @@ value in which case nil is returned."
             (error "key not found in hashe object")))))
 
 (defun hashe-exists (hash key)
-  "Searches the hash for key to determine its presence.
+  "Search `HASH' for `KEY' to determine its presence.
+
 Returns t if found, nil otherwise."
   (hashe--setup hash key
     (loop for elt in slot do
@@ -142,7 +146,10 @@ Returns t if found, nil otherwise."
           return nil)))
 
 (defun hashe-put (hash key val)
-  "Sets the value associated with key to val. May trigger a hash resize.
+  "Set the value in `HASH' associated with `KEY' to `VAL'.
+
+May trigger a hash resize.
+
 Returns t if the hash element was created, nil if it was
 overwritten"
   (hashe--setup hash key
@@ -167,7 +174,10 @@ overwritten"
     val))
 
 (defun hashe-del (hash key)
-  "Deletes the entry associated with key. Does not trigger a hash resize.
+  "Delete the entry in `HASH' associated with `KEY'.
+
+Does not trigger a hash resize.
+
 Returns t if a hash element was deleted, nil if it was not found"
   (hashe--setup hash key
     (loop with idx = 0
@@ -188,32 +198,33 @@ Returns t if a hash element was deleted, nil if it was not found"
     ))
 
 (defun hashe-map (hash func &optional cons-cell)
-  "Function which maps over the hash, passing each element to the
-function provided. If cons-cell is non-nil, func should accept
-just one argument a cons cell with the key in the car and the
-value in the cdr. Otherwise func should
-;accept two arguments, the key and value."
+  "Map over `HASH', passing each element to the function `FUNC'.
+
+ If `CONS-CELL' is non-nil, func should accept just one argument
+a cons cell with the key in the car and the value in the cdr.
+Otherwise func should accept two arguments, the key and value."
   (hashe--iter hash elt
     (if cons-cell
         (funcall func elt)
       (funcall func (car elt) (cdr elt)))))
 
 (defun hashe-keys (hash)
-  "Returns a list of keys in the hash table."
+  "Return a list of keys in `HASH'."
   (let (keys)
     (hashe--iter hash elt
       (push (car elt) keys))
     keys))
 
 (defun hashe-values (hash)
-  "Returns a list of values in the hash table."
+  "Return a list of values in `HASH'."
   (let (keys)
     (hashe--iter hash elt
       (push (cdr elt) keys))
     keys))
 
 (defun hashe-to-alist (hash)
-  "Convenience function to convert a hash to an alist.
+  "Convenience function to convert `HASH' to an alist.
+
 Returns a new alist with the existing data."
   (let (alist)
     (hashe--iter hash elt
@@ -221,16 +232,20 @@ Returns a new alist with the existing data."
     alist))
 
 (defun hashe-from-alist (alist)
-  "Convenience function to convert an alist to a hash. If a key is repeated,
-the value associated with the last occurence will overwrite the
-previous one.  Returns a new hash with the existing data."
+  "Convenience function to convert `ALIST' to a hash.
+
+If a key is repeated,the value associated with the last occurence
+will overwrite the previous one.
+
+Returns a new hash with the existing data."
   (let ((hash (make-hashe (length alist))))
     (loop for (key . val) in alist do
           (hashe-put hash key val))
     hash))
 
 (defun hashe-to-plist (hash)
-  "Convenience function to convert a hash to a plist.
+  "Convenience function to convert `HASH' to a plist.
+
 Returns a new plist with the existing data."
   (let (plist)
     (hashe--iter hash elt
@@ -239,18 +254,20 @@ Returns a new plist with the existing data."
     plist))
 
 (defun hashe-from-plist (plist)
-  "Convenience function to convert an plist to a hash. If a key is repeated,
-the value associated with the last occurence will overwrite the
-previous one.  Returns a new hash with the existing data."
+  "Convenience function to convert `PLIST' to a hash.
+
+If a key is repeated, the value associated with the last
+occurence will overwrite the previous one.
+
+Returns a new hash with the existing data."
   (let ((hash (make-hashe (/ (1+ (length plist)) 2))))
     (loop for (key val) on plist by 'cddr do
           (hashe-put hash key val))
     hash))
 
 (defun hashe-maybe-resize (hash)
-  "Check if the hash should be resized, according to its stored thresholds"
-  (let (
-        (element-bucket-ratio (/ (float (hashe-num-elements hash))
+  "Check if `HASH' should be resized."
+  (let ((element-bucket-ratio (/ (float (hashe-num-elements hash))
                                  (hashe-num-buckets hash)))
         new-size)
     (setq new-size
@@ -264,7 +281,7 @@ previous one.  Returns a new hash with the existing data."
       (hashe-resize hash new-size))))
 
 (defun hashe-resize (hash new-size)
-  "Resizes the hash to have new-size buckets"
+  "Resize `HASH' to have `NEW-SIZE' buckets."
   (when (not (eq new-size (length (hashe-buckets hash))))
     (let ((oldvec (hashe-buckets hash)))
       (setf (hashe-buckets hash) (make-vector new-size nil))
@@ -276,8 +293,10 @@ previous one.  Returns a new hash with the existing data."
                   (hashe-put hash (car drop) (cdr drop)))))))
 
 (defun hashe-stats (hash)
-  "Return an alist of stats such as bucket use ratio, element to
-bucket ratio, maximum bucket population and possibly others."
+  "Return an alist of statistics on `HASH'.
+
+Statistics included are bucket use ratio, element to bucket
+ratio and maximum bucket population."
   (list
    (cons 'bucket-use-ratio (/ (float (hashe-num-used-buckets hash))
                               (hashe-num-buckets hash)))
