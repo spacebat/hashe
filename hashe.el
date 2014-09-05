@@ -91,18 +91,21 @@ symbol."
 (defmacro hashe--setup (hash key &rest body)
   "Wrapper for common use in hashe-get, -exists, -put, -del functions,
 providing to the function body:
+
 key-str  - stringified key
 buckets  - vector of hash buckets
 slot-idx - index into the vector according to the hash function
 slot     - element of the vector referred to by slot-idx"
   (declare (indent defun))
-  `(let* ((key-str (hashe--stringify ,key))
-          (buckets (hashe-buckets ,hash))
-          (slot-idx (funcall
-                     (hashe-function ,hash)
-                     (hashe-num-buckets ,hash) key-str))
-          (slot (elt buckets slot-idx)))
-     ,@body))
+  (let ((hash-sym (gensym "hash")))
+    `(let* ((,hash-sym ,hash)
+            (key-str (hashe--stringify ,key))
+            (buckets (hashe-buckets ,hash-sym))
+            (slot-idx (funcall
+                       (hashe-function ,hash-sym)
+                       (hashe-num-buckets ,hash-sym) key-str))
+            (slot (elt buckets slot-idx)))
+       ,@body)))
 
 (defmacro hashe--iter (hash var &rest body)
   "Wrapper to consistently iterate over all elements in the table."
