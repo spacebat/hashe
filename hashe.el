@@ -171,19 +171,19 @@ overwritten"
 Returns t if a hash element was deleted, nil if it was not found"
   (hashe--setup hash key
     (loop with idx = 0
-          for elt in slot
-          do (when (string= (car elt) key-str)
-               ;; deletion
-               (if (eq idx 0)
-                   (setf (elt buckets slot-idx) (delq elt slot))
-                 (delq elt slot))
-               (decf (hashe-num-elements hash))
-               (when (not (elt buckets slot-idx))
-                 (decf (hashe-num-used-buckets hash)))
-               (return t)
-               finally
-               ;; not found
-               nil))
+          for elt in slot do
+          (when (string= (car elt) key-str)
+            ;; deletion
+            (if (eq idx 0)
+                (setf (elt buckets slot-idx) (delq elt slot))
+              (delq elt slot))
+            (decf (hashe-num-elements hash))
+            (when (not (elt buckets slot-idx))
+              (decf (hashe-num-used-buckets hash)))
+            (return t)
+            finally
+            ;; not found
+            nil))
     ;; (hashe-maybe-resize hash) ;; only call this if sizing down is desired
     ))
 
